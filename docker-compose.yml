@@ -1,0 +1,139 @@
+version: '3.8'
+
+services:
+  # ========== ВАШИ СЕРВИСЫ ==========
+  fin_postgres:
+    image: postgres:15
+    container_name: fin_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: finance
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - fin_pg_data:/var/lib/postgresql/data
+    networks:
+      - finance_net
+    restart: unless-stopped
+
+  fin_mongo:
+    image: mongo:6
+    container_name: fin_mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_DATABASE: finance
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - finance_net
+    restart: unless-stopped
+
+  # ========== POSTGRES ДЛЯ AIRFLOW (МЕТАБАЗА) ==========
+  airflow_postgres:
+    image: postgres:15
+    container_name: airflow_postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+    volumes:
+      - airflow_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    networks:
+      - finance_net
+    restart: unless-stopped
+
+  # ========== ИНИЦИАЛИЗАЦИЯ AIRFLOW (ОДИН РАЗ) ==========
+  airflow_init:
+    image: apache/airflow:2.8.1-python3.10
+    container_name: airflow_init
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow_postgres/airflow
+    command: airflow db init
+    depends_on:
+      airflow_postgres:
+        condition: service_healthy
+    networks:
+      - finance_net
+    restart: "no"
+
+  # ========== СОЗДАНИЕ АДМИНИСТРАТОРА AIRFLOW ==========
+  airflow_create_user:
+    image: apache/airflow:2.8.1-python3.10
+    container_name: airflow_create_user
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow_postgres/airflow
+    command: >
+      bash -c "airflow users create 
+      --username admin 
+      --password admin 
+      --firstname Admin 
+      --lastname User 
+      --role Admin 
+      --email admin@example.com"
+    depends_on:
+      airflow_init:
+        condition: service_completed_successfully
+    networks:
+      - finance_net
+    restart: "no"
+
+  # ========== AIRFLOW WEBSERVER ==========
+  airflow_webserver:
+    image: apache/airflow:2.8.1-python3.10
+    container_name: airflow_webserver
+    ports:
+      - "8080:8080"
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow_postgres/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    command: airflow webserver
+    depends_on:
+      airflow_create_user:
+        condition: service_completed_successfully
+    networks:
+      - finance_net
+    restart: unless-stopped
+
+  # ========== AIRFLOW SCHEDULER ==========
+  airflow_scheduler:
+    image: apache/airflow:2.8.1-python3.10
+    container_name: airflow_scheduler
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow_postgres/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+    command: airflow scheduler
+    depends_on:
+      airflow_create_user:
+        condition: service_completed_successfully
+    networks:
+      - finance_net
+    restart: unless-stopped
+
+networks:
+  finance_net:
+    driver: bridge
+
+volumes:
+  fin_pg_data:
+  mongo_data:
+  airflow_pg_data:
