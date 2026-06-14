@@ -1,22 +1,17 @@
-from airflow.hooks.base import BaseHook   # Базовый класс для всех хуков
-from pymongo import MongoClient           # Официальный драйвер MongoDB
+from airflow.hooks.base import BaseHook
+from pymongo import MongoClient
+
 
 class MongoHook(BaseHook):
-		# Конструктор: принимает conn_id (идентификатор подключения в Airflow)
-		def __init__(self, conn_id='mongo_default', *args, **kwargs):
-				super().__init__(*args, **kwargs)
-				self.conn_id = conn_id
+    def __init__(self, conn_id='mongo_default', *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.conn_id = conn_id
 
-		# Обязательный метод любого хука — возвращает объект подключения
-		def get_conn(self):
-				self.log.info(f"Подключение к MongoDB через {self.conn_id}")
-				# Получаем настройки подключения из Airflow Connections
-				conn = self.get_connection(self.conn_id)
-				# Формируем URI подключения (логин, пароль, хост, порт)
-				uri = f"mongodb://{conn.login}:{conn.password}@{conn.host}:{conn.port}/"
-				client = MongoClient(uri)
-				return client
+    def get_conn(self):
+        self.log.info(f"Подключение к MongoDB через {self.conn_id}")
+        conn = self.get_connection(self.conn_id)
+        uri = f"mongodb://{conn.login}:{conn.password}@{conn.host}:{conn.port}/"
+        return MongoClient(uri)
 
-		# Дополнительный метод для удобства: сразу возвращает объект базы данных
-		def get_db(self, db_name):
-				return self.get_conn()[db_name]
+    def get_db(self, db_name):
+        return self.get_conn()[db_name]

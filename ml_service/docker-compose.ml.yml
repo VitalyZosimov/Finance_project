@@ -1,0 +1,13 @@
+services:
+  ml_service:
+    build: ./ml_service
+    container_name: ml_service
+    networks:
+      - finance_net
+    volumes:
+      - ./ml_service/models:/app/models
+
+networks:
+  finance_net:
+    external: true
+    name: finance_project_finance_net
