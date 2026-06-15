@@ -1,0 +1,180 @@
+services:
+  fin_postgres:
+    image: postgres:15
+    container_name: fin_postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: finance
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - fin_pg_data:/var/lib/postgresql/data
+    networks:
+      - finance_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 5s
+      retries: 5
+
+  fin_mongo:
+    image: mongo:6
+    container_name: fin_mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+      MONGO_INITDB_DATABASE: finance
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - finance_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      retries: 5
+
+  airflow_postgres:
+    image: postgres:15
+    container_name: airflow_postgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: airflow
+      POSTGRES_USER: airflow
+      POSTGRES_PASSWORD: airflow
+    volumes:
+      - airflow_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    networks:
+      - finance_net
+    restart: unless-stopped
+
+  airflow_init:
+    image: apache/airflow:2.8.1-python3.10
+    container_name: airflow_init
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow_postgres/airflow
+    command: airflow db init
+    depends_on:
+      airflow_postgres:
+        condition: service_healthy
+    networks:
+      - finance_net
+    restart: "no"
+
+  airflow_create_user:
+    image: apache/airflow:2.8.1-python3.10
+    container_name: airflow_create_user
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow_postgres/airflow
+    command: >
+      bash -c "airflow users create 
+      --username admin 
+      --password admin 
+      --firstname Admin 
+      --lastname User 
+      --role Admin 
+      --email admin@example.com"
+    depends_on:
+      airflow_init:
+        condition: service_completed_successfully
+    networks:
+      - finance_net
+    restart: "no"
+
+  airflow_webserver:
+    build: .
+    container_name: airflow_webserver
+    ports:
+      - "8080:8080"
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow_postgres/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      PYTHONPATH: /opt/airflow/dags
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./models:/opt/airflow/models
+      - ./output:/opt/airflow/output
+    command: bash -c "rm -f /opt/airflow/airflow-webserver.pid && airflow webserver"
+    depends_on:
+      airflow_create_user:
+        condition: service_completed_successfully
+    networks:
+      - finance_net
+    restart: unless-stopped
+
+  airflow_scheduler:
+    build: .
+    container_name: airflow_scheduler
+    environment:
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow_postgres/airflow
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      PYTHONPATH: /opt/airflow/dags
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./models:/opt/airflow/models
+      - ./output:/opt/airflow/output
+    command: airflow scheduler
+    depends_on:
+      airflow_create_user:
+        condition: service_completed_successfully
+    networks:
+      - finance_net
+    restart: unless-stopped
+
+  metabase_db_setup:
+    image: postgres:15
+    container_name: metabase_db_setup
+    entrypoint: |
+      bash -c '
+      until pg_isready -h airflow_postgres -U airflow; do sleep 2; done;
+      PGPASSWORD=airflow psql -h airflow_postgres -U airflow -tc "SELECT 1 FROM pg_database WHERE datname = '\''metabase'\''" | grep -q 1 || PGPASSWORD=airflow psql -h airflow_postgres -U airflow -c "CREATE DATABASE metabase";
+      echo "База данных metabase готова"
+      '
+    depends_on:
+      airflow_postgres:
+        condition: service_healthy
+    networks:
+      - finance_net
+    restart: "no"
+
+  metabase:
+    image: metabase/metabase:latest
+    container_name: metabase
+    ports:
+      - "3000:3000"
+    environment:
+      MB_DB_TYPE: postgres
+      MB_DB_DBNAME: metabase
+      MB_DB_HOST: airflow_postgres
+      MB_DB_PORT: 5432
+      MB_DB_USER: airflow
+      MB_DB_PASS: airflow
+    depends_on:
+      metabase_db_setup:
+        condition: service_completed_successfully
+    networks:
+      - finance_net
+    restart: unless-stopped
+
+networks:
+  finance_net:
+    driver: bridge
+
+volumes:
+  fin_pg_data:
+  mongo_data:
+  airflow_pg_data:

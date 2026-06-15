@@ -1,0 +1,22 @@
+services:
+  superset:
+    image: apache/superset:3.1.3
+    container_name: superset
+    ports:
+      - "8088:8088"
+    environment:
+      - SUPERSET_SECRET_KEY=your_secret_key_change_me
+      - SUPERSET_LOAD_EXAMPLES=no
+    volumes:
+      - superset_data:/app/superset_home
+    networks:
+      - finance_net
+    restart: unless-stopped
+
+networks:
+  finance_net:
+    external: true
+    name: finance_project_finance_net
+
+volumes:
+  superset_data:
