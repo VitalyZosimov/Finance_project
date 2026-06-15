@@ -285,90 +285,12 @@ TelegramAlertHook отправляет сообщения при:
 ❌ Ошибке в DAG (on_failure_callback)
 
 Настройка
-bash
-docker exec -it airflow_webserver airflow variables set bot_token "YOUR_BOT_TOKEN"
-docker exec -it airflow_webserver airflow variables set tg_chat_id "YOUR_CHAT_ID"
-📸 Скриншоты
-Airflow UI — список DAG
-https://screenshots/airflow_dags.png
 
-График цены AAPL
-https://screenshots/aapl_chart.png
-
-График цены Сбербанка (MOEX)
-https://screenshots/sber_chart.png
-
-Курсы валют к BYN
-https://screenshots/currency_rates.png
-
-Стоимость портфеля
-https://screenshots/portfolio_value.png
-
-Валидация данных через Pydantic
-https://screenshots/pydantic_validation.png
-
-📌 Планы по развитию
-Подключение реальных данных через yfinance
-
-Добавление Superset (второй BI-инструмент)
-
-Расширение списка российских акций
-
-Оптимизация LSTM (Grid Search, Early Stopping)
-
-Добавление CI/CD через GitHub Actions
-
-Деплой на облачную платформу (AWS/Azure)
-
-📄 Лицензия
-MIT License. Свободное использование, модификация и распространение.
-
-👤 Автор
-Vitaly Zosimov
-Data Engineer Student
-
-GitHub: @VitalyZosimov
-
-⭐ Если проект вам помог — поставьте звезду на GitHub!
-https://img.shields.io/github/stars/VitalyZosimov/Finance_project.svg?style=social
-
-text
-
----
-
-## ✅ Что добавлено/исправлено
-
-| Что | Статус |
-|-----|--------|
-| Комментарии к структуре репозитория | ✅ |
-| Раздел "Валидация данных (Pydantic)" | ✅ |
-| Упоминание валидации в таблицах MongoDB/PostgreSQL | ✅ |
-| Пример кода валидации | ✅ |
-| Правила валидации | ✅ |
-| Сохранённые модели для всех тикеров | ✅ |
-| Описание каждого HTML-графика | ✅ |
-
----
-
-Сохраните этот код в `README.md` и запушите на GitHub. 🚀
-
-🤖 Уведомления (Telegram)
-
-TelegramAlertHook отправляет сообщения при:
-
-✅ Успешном выполнении DAG
-
-❌ Ошибке в DAG
-
-Настройка
 bash
 docker exec -it airflow_webserver airflow variables set bot_token "YOUR_BOT_TOKEN"
 docker exec -it airflow_webserver airflow variables set tg_chat_id "YOUR_CHAT_ID"
 
 📸 Скриншоты
-
-HTML-графики в браузере
-
 ### 1. Metabase/MOEX
 ![Metabase/MOEX stocks](screenshots/Metabase_Ticket.Value.png)
 
@@ -389,13 +311,19 @@ HTML-графики в браузере
 
 📌 Планы по развитию
 Подключение реальных данных через yfinance
+
 Добавление Superset (второй BI-инструмент)
+
 Расширение списка российских акций
-Оптимизация LSTM (Grid Search)
-Деплой на облачную платформу
+
+Оптимизация LSTM (Grid Search, Early Stopping)
+
+Добавление CI/CD через GitHub Actions
+
+Деплой на облачную платформу (AWS/Azure)
 
 📄 Лицензия
-MIT License
+MIT License. Свободное использование, модификация и распространение.
 
 👤 Автор
 Vitaly Zosimov
