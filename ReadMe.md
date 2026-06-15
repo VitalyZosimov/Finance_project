@@ -290,24 +290,28 @@ bash
 docker exec -it airflow_webserver airflow variables set bot_token "YOUR_BOT_TOKEN"
 docker exec -it airflow_webserver airflow variables set tg_chat_id "YOUR_CHAT_ID"
 
-📸 Скриншоты
-### 1. Metabase/MOEX
-![Metabase/MOEX stocks](screenshots/Metabase_Ticket.Value.png)
+## 📸 Скриншоты
 
-### 2. График TSLA
+### 1. Airflow UI — список DAG
+![Airflow DAGs](screenshots/main.png)
+
+### 2. Metabase — MOEX акции (круговая диаграмма)
+![Metabase MOEX](screenshots/Metabase_Ticket.Value.png)
+
+### 3. Metabase — Stock data (агрегация)
+![Metabase Stock Data](screenshots/Количество_и_Сумма_по_Close.png)
+
+### 4. График TSLA (HTML)
 ![TSLA Price](screenshots/TSLA_price.png)
 
-### 3. График GAZP (MOEX)
+### 5. График GAZP (MOEX)
 ![GAZP MOEX](screenshots/Gazp_moex.png)
 
-### 4. Курсы валют
+### 6. Курсы валют к BYN
 ![Currency Rates](screenshots/currency_rates.png)
 
-### 5. Стоимость портфеля
+### 7. Стоимость портфеля
 ![Portfolio Value](screenshots/portfolio_value.png)
-
-### 6. Metabase Stock data
-![Metabase/Stock data](screenshots/Количество_и_Сумма_по_Close.png)
 
 📌 Планы по развитию
 Подключение реальных данных через yfinance
