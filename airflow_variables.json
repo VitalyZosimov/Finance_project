@@ -1,7 +1,7 @@
 {
-  "bot_token": "8575796813:AAGqnVJByyYyQOEX0VtnUtTsJBOEmnIaOSo",
+  "bot_token": "dummy_token",
   "tg_chat_id": "465432311",
-  "alert_email": "amarillisby@gmail.com",
+  "alert_email": "********@gmail.com",
   "finnhub_api_key": "dummy_key",
   "yfinance_tickers": "AAPL,MSFT,GOOGL,AMZN,TSLA"
 }
