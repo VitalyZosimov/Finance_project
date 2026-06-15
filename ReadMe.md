@@ -299,7 +299,7 @@ docker exec -it airflow_webserver airflow variables set tg_chat_id "YOUR_CHAT_ID
 ![Metabase MOEX](screenshots/Metabase_Ticket.Value.png)
 
 ### 3. Metabase — Stock data (агрегация)
-![Metabase Stock Data](screenshots/Количество_и_Сумма_по_Close.png)
+![Metabase Stock Data](screenshots/stock_data_aggregation.png)
 
 ### 4. График TSLA (HTML)
 ![TSLA Price](screenshots/TSLA_price.png)
