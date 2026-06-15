@@ -299,7 +299,7 @@ docker exec -it airflow_webserver airflow variables set tg_chat_id "YOUR_CHAT_ID
 ![Metabase MOEX](screenshots/Metabase_Ticket.Value.png)
 
 ### 3. Metabase — Stock data (агрегация)
-![Metabase Stock Data](screenshots/Количество_и_Сумма_по_Close.png)
+![Metabase Stock Data](screenshots/stock_data_aggregation.png)
 
 ### 4. График TSLA (HTML)
 ![TSLA Price](screenshots/TSLA_price.png)
@@ -315,19 +315,14 @@ docker exec -it airflow_webserver airflow variables set tg_chat_id "YOUR_CHAT_ID
 
 📌 Планы по развитию
 Подключение реальных данных через yfinance
-
 Добавление Superset (второй BI-инструмент)
-
 Расширение списка российских акций
-
 Оптимизация LSTM (Grid Search, Early Stopping)
-
 Добавление CI/CD через GitHub Actions
-
 Деплой на облачную платформу (AWS/Azure)
 
 📄 Лицензия
-MIT License. Свободное использование, модификация и распространение.
+MIT License.
 
 👤 Автор
 Vitaly Zosimov
