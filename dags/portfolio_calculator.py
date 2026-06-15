@@ -38,6 +38,18 @@ def save_to_postgresql(df):
     conn.close()
     print(f'Сохранено {len(df)} записей в PostgreSQL')
 
+def calculate_portfolio_with_validation():
+    hook = MongoHook()
+    
+    # Валидируем данные перед расчётом
+    try:
+        stock_data = hook.validate_and_get_stock_data()
+        print(f'Данные прошли валидацию: {stock_data.total_count} записей')
+        print(f'Тикеры: {stock_data.tickers_list}')
+    except Exception as e:
+        print(f'Ошибка валидации: {e}')
+        raise
+
 def generate_charts(df):
     os.makedirs('/opt/airflow/output', exist_ok=True)
     
