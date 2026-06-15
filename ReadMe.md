@@ -121,59 +121,85 @@ PostgreSQL (airflow)	localhost:5433	        airflow	        airflow
 
 text
 Finance_project/
-├── dags/
-│   ├── hooks/
-│   │   ├── mongo_hook.py
-│   │   └── telegram_hook.py
-│   └── operators/
-│       ├── portfolio_calculator.py
-│       ├── stock_data_generator.py
-│       ├── moex_equities.py
-│       ├── currency_rates_nbrb.py
-│       └── trigger_ml_predict.py
-├── ml_service/
-│   ├── models/
-│   │   ├── lstm_AAPL.h5
-│   │   ├── scaler_AAPL.pkl
-│   │   └── ...
-│   ├── train.py
-│   ├── predict.py
-│   ├── requirements.txt
-│   └── Dockerfile
-├── output/
-│   └── tickers/
-│       ├── AAPL_price.html
-│       ├── AMZN_price.html
-│       ├── GOOGL_price.html
-│       ├── MSFT_price.html
-│       ├── TSLA_price.html
-│       ├── SBER_moex.html
-│       ├── GAZP_moex.html
-│       ├── LKOH_moex.html
-│       ├── ROSN_moex.html
-│       ├── VTBR_moex.html
-│       ├── currency_rates.html
-│       └── portfolio_value_total.html
-├── docker-compose.yml
-├── docker-compose.ml.yml
-├── get_all_data.py
-└── README.md
+│
+├── dags/                               # DAG-файлы Airflow
+│   ├── hooks/                          # Кастомные хуки
+│   │   ├── mongo_hook.py               # Подключение к MongoDB с валидацией
+│   │   └── telegram_hook.py            # Отправка сообщений в Telegram
+│   ├── operators/                      # Кастомные операторы
+│   │   ├── portfolio_calculator.py     # Расчёт портфеля + архив + графики
+│   │   ├── stock_data_generator.py     # Генерация тестовых данных
+│   │   ├── moex_equities.py            # Загрузка российских акций (MOEX)
+│   │   ├── currency_rates_nbrb.py      # Курсы валют НБРБ (Беларусь)
+│   │   └── trigger_ml_predict.py       # Запуск ML прогноза после ETL
+│
+├── models/                             # Pydantic модели валидации
+│   ├── __init__.py
+│   ├── stock_data.py                   # Валидация цен акций
+│   ├── portfolio_metrics.py            # Валидация портфельных метрик
+│   ├── moex_stocks.py                  # Валидация российских акций
+│   └── currency_rates.py               # Валидация курсов валют
+│
+├── ml_service/                         # Отдельный ML-контейнер
+│   ├── models/                         # Сохранённые LSTM модели
+│   │   ├── lstm_AAPL.h5                # Обученная модель для AAPL
+│   │   ├── scaler_AAPL.pkl             # Нормализатор для AAPL
+│   │   ├── lstm_MSFT.h5                # Обученная модель для MSFT
+│   │   ├── scaler_MSFT.pkl             # Нормализатор для MSFT
+│   │   └── ...                         # Аналогично для GOOGL, AMZN, TSLA
+│   ├── train.py                        # Обучение LSTM модели
+│   ├── predict.py                      # Прогнозирование
+│   ├── requirements.txt                # Python зависимости
+│   └── Dockerfile                      # Сборка ML-образа
+│
+├── output/                             # Генерируемые HTML-графики
+│   ├── tickers/                        # Графики по отдельным тикерам
+│   │   ├── AAPL_price.html             # График цены AAPL
+│   │   ├── MSFT_price.html             # График цены MSFT
+│   │   ├── GOOGL_price.html            # График цены GOOGL
+│   │   ├── AMZN_price.html             # График цены AMZN
+│   │   ├── TSLA_price.html             # График цены TSLA
+│   │   ├── SBER_moex.html              # График цены Сбербанка (MOEX)
+│   │   ├── GAZP_moex.html              # График цены Газпрома (MOEX)
+│   │   ├── LKOH_moex.html              # График цены Лукойла (MOEX)
+│   │   ├── ROSN_moex.html              # График цены Роснефти (MOEX)
+│   │   ├── VTBR_moex.html              # График цены ВТБ (MOEX)
+│   ├── currency_rates.html             # Столбчатая диаграмма курсов валют
+│   └── portfolio_value_total.html      # Линейный график стоимости портфеля
+│
+├── screenshots/                        # Скриншоты для README
+│   ├── airflow_dags.png
+│   ├── aapl_chart.png
+│   ├── sber_chart.png
+│   ├── currency_rates.png
+│   └── portfolio_value.png
+│
+├── docker-compose.yml                  # Основные сервисы (Airflow, MongoDB, PostgreSQL, Metabase)
+├── docker-compose.ml.yml               # ML-сервис (TensorFlow)
+├── get_all_data.py                     # Единый скрипт загрузки всех данных и генерации графиков
+├── charts.py                           # Скрипт генерации HTML-графиков (отдельно)
+├── requirements.txt                    # Python зависимости
+├── .env                                # Переменные окружения
+└── README.md                           # Документация
 
 📊 Модель данных
 
 MongoDB — горячее хранилище (stockviz)
 
-Коллекция	        Количество	    Описание
-stock_data	        10 960	        Тестовые данные (AAPL, MSFT, GOOGL, AMZN, TSLA)
-portfolio_metrics	2 192	        Ежедневная стоимость и доходность портфеля
-moex_stocks	        155	            Российские акции (SBER, GAZP, LKOH, ROSN, VTBR)
-currency_rates  	8	            Курсы валют к BYN
-predictions	        5           	LSTM прогнозы
+
+Коллекция	        Количество	Описание	                                    Валидация
+stock_data	        10 960	    Тестовые данные (AAPL, MSFT, GOOGL, AMZN, TSLA)	✅ Pydantic
+portfolio_metrics	2 192	    Ежедневная стоимость и доходность портфеля	    ✅ Pydantic
+moex_stocks	        155	        Российские акции (SBER, GAZP, LKOH, ROSN, VTBR)	✅ Pydantic
+currency_rates	    8	        Курсы валют к BYN	                            ✅ Pydantic
+predictions	        5	        LSTM прогнозы	                                ✅ Pydantic
+
 
 PostgreSQL — холодное хранилище (finance)
 
-Таблица         	Описание	TTL
-portfolio_archive	Архив портфеля с датой создания	3 дня (автоочистка)
+Таблица            	Описание	                    TTL	                Валидация
+portfolio_archive	Архив портфеля с датой создания	3 дня (автоочистка)	✅ Pydantic
+
 
 🔄 ETL Pipeline (DAG)
 
@@ -215,6 +241,21 @@ Batch size	        32
 Optimizer	        Adam
 Loss function   	MSE
 
+Сохранённые модели
+После обучения в папке ml_service/models/ появляются файлы:
+text
+ml_service/models/
+├── lstm_AAPL.h5      # ~2 MB (веса и архитектура для AAPL)
+├── scaler_AAPL.pkl   # ~1 KB (нормализатор для AAPL)
+├── lstm_MSFT.h5
+├── scaler_MSFT.pkl
+├── lstm_GOOGL.h5
+├── scaler_GOOGL.pkl
+├── lstm_AMZN.h5
+├── scaler_AMZN.pkl
+├── lstm_TSLA.h5
+└── scaler_TSLA.pkl
+
 📊 Визуализация
 
 #Metabase
@@ -230,11 +271,86 @@ Password: mongo
 HTML-графики (Plotly)
 Автоматически генерируются в папке output/tickers/:
 
-Тип	            Файлы
-Тестовые данные	AAPL_price.html, MSFT_price.html, GOOGL_price.html, AMZN_price.html, TSLA_price.html
-MOEX (Россия)	SBER_moex.html, GAZP_moex.html, LKOH_moex.html, ROSN_moex.html, VTBR_moex.html
-Курсы валют 	currency_rates.html
-Портфель	    portfolio_value_total.html
+Тип	Файлы	    Что показывает
+Тестовые данные	AAPL_price.html, MSFT_price.html, GOOGL_price.html, AMZN_price.html, TSLA_price.html - Динамику цен акций
+MOEX (Россия)	SBER_moex.html, GAZP_moex.html, LKOH_moex.html, ROSN_moex.html, VTBR_moex.html	- Динамику цен российских акций
+Курсы валют	    currency_rates.html	- Курсы валют к BYN
+Портфель	    portfolio_value_total.html	- Стоимость портфеля во времени
+
+🤖 Уведомления (Telegram)
+TelegramAlertHook отправляет сообщения при:
+
+✅ Успешном выполнении DAG (on_success_callback)
+
+❌ Ошибке в DAG (on_failure_callback)
+
+Настройка
+bash
+docker exec -it airflow_webserver airflow variables set bot_token "YOUR_BOT_TOKEN"
+docker exec -it airflow_webserver airflow variables set tg_chat_id "YOUR_CHAT_ID"
+📸 Скриншоты
+Airflow UI — список DAG
+https://screenshots/airflow_dags.png
+
+График цены AAPL
+https://screenshots/aapl_chart.png
+
+График цены Сбербанка (MOEX)
+https://screenshots/sber_chart.png
+
+Курсы валют к BYN
+https://screenshots/currency_rates.png
+
+Стоимость портфеля
+https://screenshots/portfolio_value.png
+
+Валидация данных через Pydantic
+https://screenshots/pydantic_validation.png
+
+📌 Планы по развитию
+Подключение реальных данных через yfinance
+
+Добавление Superset (второй BI-инструмент)
+
+Расширение списка российских акций
+
+Оптимизация LSTM (Grid Search, Early Stopping)
+
+Добавление CI/CD через GitHub Actions
+
+Деплой на облачную платформу (AWS/Azure)
+
+📄 Лицензия
+MIT License. Свободное использование, модификация и распространение.
+
+👤 Автор
+Vitaly Zosimov
+Data Engineer Student
+
+GitHub: @VitalyZosimov
+
+⭐ Если проект вам помог — поставьте звезду на GitHub!
+https://img.shields.io/github/stars/VitalyZosimov/Finance_project.svg?style=social
+
+text
+
+---
+
+## ✅ Что добавлено/исправлено
+
+| Что | Статус |
+|-----|--------|
+| Комментарии к структуре репозитория | ✅ |
+| Раздел "Валидация данных (Pydantic)" | ✅ |
+| Упоминание валидации в таблицах MongoDB/PostgreSQL | ✅ |
+| Пример кода валидации | ✅ |
+| Правила валидации | ✅ |
+| Сохранённые модели для всех тикеров | ✅ |
+| Описание каждого HTML-графика | ✅ |
+
+---
+
+Сохраните этот код в `README.md` и запушите на GitHub. 🚀
 
 🤖 Уведомления (Telegram)
 
