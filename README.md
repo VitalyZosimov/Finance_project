@@ -293,25 +293,25 @@ docker exec -it airflow_webserver airflow variables set tg_chat_id "YOUR_CHAT_ID
 ## 📸 Скриншоты
 
 ### 1. Airflow UI — список DAG
-![Airflow DAGs](https://github.com/VitalyZosimov/Finance_project/blob/master/screenshots/main.png?raw=true)
+![Airflow DAGs](https://github.com/VitalyZosimov/Finance_project/blob/main/screenshots/main.png?raw=true)
 
 ### 2. Metabase — MOEX акции
-![Metabase MOEX](https://github.com/VitalyZosimov/Finance_project/blob/master/screenshots/Metabase_Ticket.Value.png?raw=true)
+![Metabase MOEX](https://github.com/VitalyZosimov/Finance_project/blob/main/screenshots/Metabase_Ticket.Value.png?raw=true)
 
 ### 3. Metabase — Stock data
-![Metabase Stock Data](https://github.com/VitalyZosimov/Finance_project/blob/master/screenshots/stock_data_aggregation.png?raw=true)
+![Metabase Stock Data](https://github.com/VitalyZosimov/Finance_project/blob/main/screenshots/stock_data_aggregation.png?raw=true)
 
 ### 4. График TSLA
-![TSLA Price](https://github.com/VitalyZosimov/Finance_project/blob/master/screenshots/TSLA_price.png?raw=true)
+![TSLA Price](https://github.com/VitalyZosimov/Finance_project/blob/main/screenshots/TSLA_price.png?raw=true)
 
 ### 5. График GAZP (MOEX)
-![GAZP MOEX](https://github.com/VitalyZosimov/Finance_project/blob/master/screenshots/Gazp_moex.png?raw=true)
+![GAZP MOEX](https://github.com/VitalyZosimov/Finance_project/blob/main/screenshots/Gazp_moex.png?raw=true)
 
 ### 6. Курсы валют
-![Currency Rates](https://github.com/VitalyZosimov/Finance_project/blob/master/screenshots/currency_rates.png?raw=true)
+![Currency Rates](https://github.com/VitalyZosimov/Finance_project/blob/main/screenshots/currency_rates.png?raw=true)
 
 ### 7. Стоимость портфеля
-![Portfolio Value](https://github.com/VitalyZosimov/Finance_project/blob/master/screenshots/portfolio_value.png?raw=true)
+![Portfolio Value](https://github.com/VitalyZosimov/Finance_project/blob/main/screenshots/portfolio_value.png?raw=true)
 
 📌 Планы по развитию
 Подключение реальных данных через yfinance
